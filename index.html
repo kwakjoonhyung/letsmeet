@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Deggendorf Treffen</title>
+
+<!-- ★ Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Noto Sans KR',sans-serif;background:#eee8d8;min-height:100vh;color:#2a1f0e}
@@ -36,18 +41,13 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .meeting-meta{font-size:12px;color:#888;margin-top:3px}
 .meeting-badge{display:inline-block;background:var(--bav-blue);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:6px}
 .del-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#fee2e2;border:none;border-radius:6px;color:#991b1b;font-size:13px;padding:5px 8px;cursor:pointer}
-
-/* ── CALENDAR ── */
+/* CALENDAR */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .cal-nav{background:none;border:1.5px solid #ddd;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;color:var(--bav-blue)}
 .cal-month{font-size:14px;font-weight:700;color:var(--bav-blue)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-dow{font-size:10px;font-weight:700;text-align:center;color:#999;padding:4px 0}
-.cal-day{
-  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;font-size:12px;cursor:pointer;border:1.5px solid transparent;
-  transition:all .15s;user-select:none
-}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none}
 .cal-day:hover:not(.cal-empty):not(.cal-past){background:#e8f0fa;border-color:var(--bav-blue-light)}
 .cal-day.cal-empty{cursor:default}
 .cal-day.cal-past{color:#ccc;cursor:default}
@@ -58,8 +58,7 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .date-chip{display:inline-block;background:var(--bav-blue);color:#fff;font-size:11px;padding:3px 8px;border-radius:10px;margin:2px;cursor:pointer}
 .date-chip:hover{background:#c0392b}
 .no-dates{font-size:12px;color:#bbb;font-style:italic}
-
-/* ── GRID ── */
+/* GRID */
 .grid-container{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid #e0d5c0;margin-top:6px}
 .grid-table{border-collapse:collapse;table-layout:auto;width:max-content;min-width:100%}
 .grid-table th{background:var(--bav-blue);color:#fff;font-size:11px;padding:7px 6px;text-align:center;font-weight:700;white-space:nowrap;min-width:52px}
@@ -67,9 +66,7 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .grid-table td{height:36px;min-width:52px;border:1px solid #c8b89a;cursor:pointer;text-align:center;font-size:9px;color:#aaa;transition:background .1s;white-space:nowrap;user-select:none;-webkit-user-select:none}
 .grid-table td.tl{min-width:44px;background:#f5f0e0;font-size:10px;color:#888;cursor:default;font-weight:600;padding:0 6px;white-space:nowrap;border:1px solid #c8b89a}
 .grid-table td.sel{background:var(--bav-blue)!important;border-color:#1a4b8c!important}
-.grid-table td.drag-hover{background:#adc4f0!important}
-
-/* ── RANK ── */
+/* RANK */
 .rank-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0d5c0;border-radius:10px;padding:12px 14px;margin-bottom:8px}
 .rank-badge{min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
 .rank-1{background:#fde68a;color:#92400e}.rank-2{background:#e2e8f0;color:#475569}
@@ -80,33 +77,37 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .rank-bar-wrap{margin-top:5px;background:#f0ece0;border-radius:6px;height:6px;overflow:hidden}
 .rank-bar{height:100%;border-radius:6px;background:var(--bav-blue)}
 .rank-count{font-size:11px;font-weight:700;color:var(--bav-blue);flex-shrink:0;text-align:right}
-
-/* ── TABS ── */
+/* TABS */
 .tab-bar{display:flex;background:var(--bav-cream);border-radius:10px;padding:3px;margin-bottom:14px;border:1px solid #e0d5c0}
 .tab-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:8px;font-size:13px;cursor:pointer;color:#888;transition:all .15s}
 .tab-btn.active{background:var(--bav-blue);color:#fff;font-weight:700}
-
 .instruction{font-size:12px;color:#888;text-align:center;margin:4px 0 10px}
 .alert{padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;display:none}
 .alert-error{background:#fee2e2;color:#991b1b;display:block}
-.alert-success{background:#dcfce7;color:#166534;display:block}
 .participant-chip{display:inline-block;background:var(--bav-blue);color:#fff;font-size:11px;padding:3px 9px;border-radius:12px;margin:2px}
 .participant-chip.host{background:var(--bav-gold)}
 .link-text{color:var(--bav-blue);font-size:13px;cursor:pointer;text-decoration:underline;text-align:center;margin-top:8px}
 .empty-state{text-align:center;color:#aaa;font-size:13px;padding:20px 0}
-#toast{
-  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#1a4b8c;color:#fff;padding:12px 24px;border-radius:24px;
-  font-size:14px;font-weight:600;white-space:nowrap;
-  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:999;
-  box-shadow:0 4px 16px rgba(0,0,0,0.2)
-}
+/* TOAST */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a4b8c;color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* LOADING */
+#loading-overlay{position:fixed;inset:0;background:rgba(248,245,238,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+.spinner{width:36px;height:36px;border:4px solid #e0d5c0;border-top-color:var(--bav-blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:#888}
 </style>
 </head>
 <body>
 
 <div id="toast"></div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">불러오는 중...</div>
+</div>
+
 <div class="app-header">
   <div class="header-content">
     <div class="app-title">🏰 Deggendorf Treffen</div>
@@ -132,7 +133,7 @@ input:focus,select:focus{border-color:var(--bav-blue)}
   </div>
   <div class="card">
     <div class="card-title">📋 모임 목록</div>
-    <div id="public-meeting-list"><div class="empty-state">아직 생성된 모임이 없어요<br>새 모임을 만들어보세요! 🍺</div></div>
+    <div id="public-meeting-list"><div class="empty-state">불러오는 중...</div></div>
   </div>
 </div>
 
@@ -150,13 +151,12 @@ input:focus,select:focus{border-color:var(--bav-blue)}
   </div>
   <div class="card">
     <div class="card-title">📅 날짜 선택 <span style="font-size:11px;font-weight:400;color:#999">(달력에서 원하는 날짜를 탭하세요)</span></div>
-    <!-- Calendar -->
     <div class="cal-header">
       <button class="cal-nav" onclick="calMove(-1)">‹</button>
       <div class="cal-month" id="cal-month-label"></div>
       <button class="cal-nav" onclick="calMove(1)">›</button>
     </div>
-    <div class="cal-grid" id="cal-dow-row">
+    <div class="cal-grid">
       <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
       <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
     </div>
@@ -204,7 +204,6 @@ input:focus,select:focus{border-color:var(--bav-blue)}
     <p class="instruction">탭해서 가능한 시간을 선택하세요 (파란색 = 가능)</p>
     <div class="grid-container"><table class="grid-table" id="my-grid"></table></div>
     <button class="btn btn-gold" onclick="saveMySchedule()">저장하기 💾</button>
-
   </div>
   <div id="tab-content-all" style="display:none">
     <div id="rank-list"></div>
@@ -216,77 +215,121 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 </div>
 
 <script>
+// ★★★ Firebase 설정 — 아래 값을 본인 Firebase 프로젝트 설정으로 교체하세요 ★★★
+var firebaseConfig = {
+  apiKey:            "AIzaSyB2nNGTf714zvsQK4YKcK3FehMlnXcJBF8",
+  authDomain:        "deggendorf-treffen.firebaseapp.com",
+  databaseURL:       "https://deggendorf-treffen-default-rtdb.firebaseio.com",
+  projectId:         "deggendorf-treffen",
+  storageBucket:     "deggendorf-treffen.firebasestorage.app",
+  messagingSenderId: "81369339541",
+  appId:             "1:81369339541:web:884fc2a409454e85a96d9c"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+// ── STATE ──────────────────────────────────────────
 var S={meetings:{},user:null,mid:null,mySlots:new Set()};
 var calYear,calMonth,selDates=[];
+var unsubMeetings=null; // Firebase listener 해제용
 
-// ── CALENDAR ──────────────────────────────────────────
-function initCal(){
-  var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();renderCal();
+// ── FIREBASE HELPERS ───────────────────────────────
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
+
+// 모임 목록 실시간 구독
+function subscribeMeetings(){
+  db.ref('meetings').on('value',function(snap){
+    S.meetings={};
+    var data=snap.val()||{};
+    Object.keys(data).forEach(function(id){
+      var m=data[id];
+      // slots: Firebase에는 배열/객체로 저장, Set으로 변환
+      var sch={};
+      Object.keys(m.schedules||{}).forEach(function(name){
+        var raw=m.schedules[name];
+        sch[name]={pw:raw.pw,slots:new Set(raw.slots||[])};
+      });
+      S.meetings[id]={
+        id:id,title:m.title,host:m.host,
+        dates:m.dates||[],timeStart:m.timeStart,timeEnd:m.timeEnd,
+        schedules:sch
+      };
+    });
+    renderPublicList();
+    hideLoading();
+    // 현재 모임 보고 있으면 현황 갱신
+    if(S.mid&&S.meetings[S.mid]&&document.getElementById('tab-content-all').style.display!=='none'){
+      buildRankList();
+    }
+  });
 }
-function calMove(d){
-  calMonth+=d;
-  if(calMonth<0){calMonth=11;calYear--;}
-  if(calMonth>11){calMonth=0;calYear++;}
-  renderCal();
+
+function saveMeetingToDB(m){
+  var payload={
+    title:m.title,host:m.host,dates:m.dates,
+    timeStart:m.timeStart,timeEnd:m.timeEnd,schedules:{}
+  };
+  Object.keys(m.schedules).forEach(function(name){
+    payload.schedules[name]={pw:m.schedules[name].pw,slots:Array.from(m.schedules[name].slots)};
+  });
+  return db.ref('meetings/'+m.id).set(payload);
 }
+
+function saveSlotsToDB(){
+  var slots=Array.from(S.mySlots);
+  return db.ref('meetings/'+S.mid+'/schedules/'+S.user+'/slots').set(slots);
+}
+
+function deleteMeetingFromDB(id){
+  return db.ref('meetings/'+id).remove();
+}
+
+// ── CALENDAR ───────────────────────────────────────
+function initCal(){var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();renderCal();}
+function calMove(d){calMonth+=d;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}renderCal();}
 function renderCal(){
   var months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('cal-month-label').textContent=calYear+'년 '+months[calMonth];
   var first=new Date(calYear,calMonth,1).getDay();
   var days=new Date(calYear,calMonth+1,0).getDate();
-  var today=new Date(); today.setHours(0,0,0,0);
+  var today=new Date();today.setHours(0,0,0,0);
   var html='';
-  for(var i=0;i<first;i++) html+='<div class="cal-day cal-empty"></div>';
+  for(var i=0;i<first;i++)html+='<div class="cal-day cal-empty"></div>';
   for(var d=1;d<=days;d++){
     var dt=new Date(calYear,calMonth,d);
     var ds=fmtDate(dt);
-    var isPast=dt<today;
-    var isSel=selDates.indexOf(ds)>=0;
-    var isToday=dt.getTime()===today.getTime();
+    var isPast=dt<today,isSel=selDates.indexOf(ds)>=0,isToday=dt.getTime()===today.getTime();
     var cls='cal-day'+(isPast?' cal-past':'')+(isSel?' cal-selected':'')+(isToday?' cal-today':'');
-    var onclick=isPast?'':'onclick="toggleDate(\''+ds+'\')"';
-    html+='<div class="'+cls+'" '+onclick+'>'+d+'</div>';
+    var oc=isPast?'':'onclick="toggleDate(\''+ds+'\')"';
+    html+='<div class="'+cls+'" '+oc+'>'+d+'</div>';
   }
   document.getElementById('cal-days').innerHTML=html;
   renderChips();
 }
-function toggleDate(ds){
-  var idx=selDates.indexOf(ds);
-  if(idx>=0) selDates.splice(idx,1);
-  else { selDates.push(ds); selDates.sort(); }
-  renderCal();
-}
-function removeDate(ds){toggleDate(ds);}
+function toggleDate(ds){var i=selDates.indexOf(ds);if(i>=0)selDates.splice(i,1);else{selDates.push(ds);selDates.sort();}renderCal();}
 function renderChips(){
   document.getElementById('sel-count').textContent=selDates.length;
-  if(!selDates.length){
-    document.getElementById('sel-date-chips').innerHTML='<div class="no-dates">날짜를 선택해주세요</div>';return;
-  }
+  if(!selDates.length){document.getElementById('sel-date-chips').innerHTML='<div class="no-dates">날짜를 선택해주세요</div>';return;}
   document.getElementById('sel-date-chips').innerHTML=selDates.map(function(ds){
-    return '<span class="date-chip" onclick="removeDate(\''+ds+'\')">'+getDateLabel(ds)+'</span>';
+    return '<span class="date-chip" onclick="toggleDate(\''+ds+'\')">'+getDateLabel(ds)+'</span>';
   }).join('');
 }
 
-// ── HELPERS ──────────────────────────────────────────
+// ── HELPERS ────────────────────────────────────────
 function fmtDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function pad(n){return n<10?'0'+n:n;}
-function getDateLabel(s){
-  var d=new Date(s+'T00:00:00'),days=['일','월','화','수','목','금','토'];
-  return (d.getMonth()+1)+'/'+d.getDate()+'('+days[d.getDay()]+')';
-}
-function showPage(id){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-}
+function getDateLabel(s){var d=new Date(s+'T00:00:00'),days=['일','월','화','수','목','금','토'];return(d.getMonth()+1)+'/'+d.getDate()+'('+days[d.getDay()]+')'}
+function showPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.getElementById(id).classList.add('active');}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
-// ── MEETING LIST ──────────────────────────────────────
+// ── MEETING LIST ───────────────────────────────────
 function deleteMeeting(id,e){
   e.stopPropagation();
   var m=S.meetings[id];
   var pw=prompt('모임을 삭제하려면 주최자('+m.host+')의 비밀번호를 입력하세요:');
   if(pw===null)return;
-  if(pw!==m.schedules[m.host].pw){alert('비밀번호가 틀렸습니다');return;}
-  delete S.meetings[id];renderPublicList();
+  if(pw!==m.schedules[m.host].pw){showToast('❌ 비밀번호가 틀렸습니다');return;}
+  deleteMeetingFromDB(id).then(function(){showToast('🗑️ 모임이 삭제됐습니다');});
 }
 function renderPublicList(){
   var el=document.getElementById('public-meeting-list');
@@ -294,26 +337,24 @@ function renderPublicList(){
   if(!ids.length){el.innerHTML='<div class="empty-state">아직 생성된 모임이 없어요<br>새 모임을 만들어보세요! 🍺</div>';return;}
   el.innerHTML=ids.map(function(id){
     var m=S.meetings[id],cnt=Object.keys(m.schedules).length;
-    var dateRange=m.dates.length===1?getDateLabel(m.dates[0]):getDateLabel(m.dates[0])+'외 '+(m.dates.length-1)+'일';
+    var dr=m.dates.length===1?getDateLabel(m.dates[0]):getDateLabel(m.dates[0])+' 외 '+(m.dates.length-1)+'일';
     return '<div class="meeting-item" onclick="joinMeeting(\''+id+'\')">'+
       '<div class="meeting-name">'+m.title+'<span class="meeting-badge">'+cnt+'명</span></div>'+
-      '<div class="meeting-meta">📅 '+dateRange+'&nbsp;·&nbsp;주최: '+m.host+'</div>'+
+      '<div class="meeting-meta">📅 '+dr+'&nbsp;·&nbsp;주최: '+m.host+'</div>'+
       '<button class="del-btn" onclick="deleteMeeting(\''+id+'\',event)">🗑️</button>'+
       '</div>';
   }).join('');
 }
 
-// ── AUTH ──────────────────────────────────────────────
+// ── AUTH ───────────────────────────────────────────
 function doLogin(){
   var name=document.getElementById('login-name').value.trim();
   var pw=document.getElementById('login-pw').value.trim();
   var al=document.getElementById('login-alert');al.className='alert';
   if(!name||!pw){al.textContent='이름과 비밀번호를 입력해주세요';al.className='alert alert-error';return;}
-  var mid=Object.keys(S.meetings).find(function(id){
-    var m=S.meetings[id];return m.schedules[name]&&m.schedules[name].pw===pw;
-  });
+  var mid=Object.keys(S.meetings).find(function(id){var m=S.meetings[id];return m.schedules[name]&&m.schedules[name].pw===pw;});
   if(mid){S.user=name;S.mid=mid;S.mySlots=new Set(S.meetings[mid].schedules[name].slots);openMeeting(mid);}
-  else{al.textContent='일치하는 계정이 없습니다. 모임 목록에서 참여하거나 새 모임을 만들어보세요.';al.className='alert alert-error';}
+  else{al.textContent='일치하는 계정이 없습니다. 모임 목록에서 모임을 선택해 참여하세요.';al.className='alert alert-error';}
 }
 function joinMeeting(mid){
   var name=document.getElementById('login-name').value.trim();
@@ -321,13 +362,18 @@ function joinMeeting(mid){
   var al=document.getElementById('login-alert');al.className='alert';
   if(!name||!pw){al.textContent='이름과 비밀번호를 먼저 입력해주세요';al.className='alert alert-error';return;}
   var m=S.meetings[mid];
-  if(m.schedules[name]){if(m.schedules[name].pw!==pw){al.textContent='비밀번호가 틀렸어요';al.className='alert alert-error';return;}}
-  else{m.schedules[name]={pw:pw,slots:new Set()};}
-  S.user=name;S.mid=mid;S.mySlots=new Set(m.schedules[name].slots);openMeeting(mid);
+  if(m.schedules[name]){
+    if(m.schedules[name].pw!==pw){al.textContent='비밀번호가 틀렸어요';al.className='alert alert-error';return;}
+  } else {
+    // 신규 참여자 → Firebase에 먼저 등록
+    db.ref('meetings/'+mid+'/schedules/'+name).set({pw:pw,slots:[]});
+  }
+  S.user=name;S.mid=mid;S.mySlots=new Set((m.schedules[name]||{slots:[]}).slots);
+  openMeeting(mid);
 }
-function logout(){S.user=null;S.mid=null;S.mySlots=new Set();renderPublicList();showPage('page-home');}
+function logout(){S.user=null;S.mid=null;S.mySlots=new Set();showPage('page-home');}
 
-// ── CREATE ────────────────────────────────────────────
+// ── CREATE ─────────────────────────────────────────
 function createMeeting(){
   var name=document.getElementById('host-name').value.trim();
   var pw=document.getElementById('host-pw').value.trim();
@@ -339,29 +385,33 @@ function createMeeting(){
   if(!selDates.length){al.textContent='날짜를 하나 이상 선택해주세요';al.className='alert alert-error';return;}
   if(ts>=te){al.textContent='시간을 확인해주세요';al.className='alert alert-error';return;}
   var id='mtg_'+Date.now();
-  S.meetings[id]={id:id,title:title,host:name,dates:[].concat(selDates),timeStart:ts,timeEnd:te,schedules:{}};
-  S.meetings[id].schedules[name]={pw:pw,slots:new Set()};
-  S.user=name;S.mid=id;S.mySlots=new Set();
-  selDates=[];renderCal();
-  renderPublicList();openMeeting(id);
+  var m={id:id,title:title,host:name,dates:[].concat(selDates),timeStart:ts,timeEnd:te,
+    schedules:{}};
+  m.schedules[name]={pw:pw,slots:new Set()};
+  saveMeetingToDB(m).then(function(){
+    S.user=name;S.mid=id;S.mySlots=new Set();
+    selDates=[];renderCal();
+    showToast('🏰 모임이 생성됐습니다!');
+    openMeeting(id);
+  });
 }
 
-// ── OPEN MEETING ──────────────────────────────────────
+// ── OPEN MEETING ───────────────────────────────────
 function openMeeting(mid){
   var m=S.meetings[mid];
   var cnt=Object.keys(m.schedules).length;
-  var datesStr=m.dates.map(getDateLabel).join(', ');
+  var dr=m.dates.map(getDateLabel).join(', ');
   document.getElementById('meeting-header').innerHTML=
     '<div class="card" style="margin-bottom:12px">'+
     '<div style="font-size:17px;font-weight:800;color:var(--bav-blue)">'+m.title+'</div>'+
     '<div style="font-size:12px;color:#888;margin-top:3px">주최: '+m.host+' &nbsp;·&nbsp; 참여 '+cnt+'명</div>'+
-    '<div style="font-size:12px;color:#888;margin-top:2px;line-height:1.6">📅 '+datesStr+'</div>'+
+    '<div style="font-size:12px;color:#888;margin-top:2px;line-height:1.7">📅 '+dr+'</div>'+
     '<div style="font-size:12px;font-weight:700;color:var(--bav-blue);margin-top:6px">👋 안녕하세요, '+S.user+'님!</div>'+
     '</div>';
   switchTab('mine');showPage('page-meeting');
 }
 
-// ── GRID ──────────────────────────────────────────────
+// ── GRID ───────────────────────────────────────────
 function buildMyGrid(){
   var m=S.meetings[S.mid],tbl=document.getElementById('my-grid');
   tbl.innerHTML='';
@@ -380,62 +430,26 @@ function buildMyGrid(){
   }
   initDragSelect(tbl);
 }
-
 function initDragSelect(tbl){
-  var dragging=false, dragMode=null;
-
+  var dragging=false,dragMode=null;
   function getKey(el){return el&&el.dataset&&el.dataset.key?el.dataset.key:null;}
-  function toggleKey(key){
-    var td=tbl.querySelector('[data-key="'+key+'"]');
-    if(!td)return;
+  function applyKey(key){
+    var td=tbl.querySelector('[data-key="'+key+'"]');if(!td)return;
     if(dragMode==='add'){S.mySlots.add(key);td.classList.add('sel');}
     else{S.mySlots.delete(key);td.classList.remove('sel');}
   }
-
-  // Mouse
-  tbl.addEventListener('mousedown',function(e){
-    var key=getKey(e.target);if(!key)return;
-    e.preventDefault();
-    dragging=true;
-    dragMode=S.mySlots.has(key)?'remove':'add';
-    toggleKey(key);
-  });
-  tbl.addEventListener('mouseover',function(e){
-    if(!dragging)return;
-    var key=getKey(e.target);if(!key)return;
-    toggleKey(key);
-  });
+  tbl.addEventListener('mousedown',function(e){var k=getKey(e.target);if(!k)return;e.preventDefault();dragging=true;dragMode=S.mySlots.has(k)?'remove':'add';applyKey(k);});
+  tbl.addEventListener('mouseover',function(e){if(!dragging)return;var k=getKey(e.target);if(k)applyKey(k);});
   document.addEventListener('mouseup',function(){dragging=false;});
-
-  // Touch
-  tbl.addEventListener('touchstart',function(e){
-    var key=getKey(e.target);if(!key)return;
-    e.preventDefault();
-    dragging=true;
-    dragMode=S.mySlots.has(key)?'remove':'add';
-    toggleKey(key);
-  },{passive:false});
-  tbl.addEventListener('touchmove',function(e){
-    if(!dragging)return;
-    e.preventDefault();
-    var t=e.touches[0];
-    var el=document.elementFromPoint(t.clientX,t.clientY);
-    var key=getKey(el);if(!key)return;
-    toggleKey(key);
-  },{passive:false});
+  tbl.addEventListener('touchstart',function(e){var k=getKey(e.target);if(!k)return;e.preventDefault();dragging=true;dragMode=S.mySlots.has(k)?'remove':'add';applyKey(k);},{passive:false});
+  tbl.addEventListener('touchmove',function(e){if(!dragging)return;e.preventDefault();var t=e.touches[0],el=document.elementFromPoint(t.clientX,t.clientY),k=getKey(el);if(k)applyKey(k);},{passive:false});
   tbl.addEventListener('touchend',function(){dragging=false;});
 }
 function saveMySchedule(){
-  S.meetings[S.mid].schedules[S.user].slots=new Set(S.mySlots);
-  showToast('✅ 저장됐습니다! Prost! 🍺');
-}
-function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2500);
+  saveSlotsToDB().then(function(){showToast('✅ 저장됐습니다! Prost! 🍺');});
 }
 
-// ── RANKING ───────────────────────────────────────────
+// ── RANKING ────────────────────────────────────────
 function buildRankList(){
   var m=S.meetings[S.mid];
   var total=Object.keys(m.schedules).length;
@@ -451,29 +465,19 @@ function buildRankList(){
   var el=document.getElementById('rank-list');
   if(!sorted.length){el.innerHTML='<div class="empty-state">아직 아무도 일정을 입력하지 않았어요 🤷</div>';renderParticipants();return;}
   var maxScore=scores[sorted[0]];
-  var rankLabels=['🥇','🥈','🥉'];
-  var rankClasses=['rank-1','rank-2','rank-3'];
-  var prevScore=-1,rankNum=0;
+  var rl=['🥇','🥈','🥉'],rc=['rank-1','rank-2','rank-3'];
+  var prev=-1,rn=0;
   var html='<div style="font-size:13px;font-weight:700;color:var(--bav-blue);margin-bottom:8px">총 '+total+'명 참여 · 상위 순위</div>';
   sorted.slice(0,8).forEach(function(key,i){
-    var sc=scores[key];
-    if(sc!==prevScore){rankNum=i+1;prevScore=sc;}
-    var parts=key.split('-');
-    var di=parseInt(parts[0]),s=parseInt(parts[1]);
-    var h=m.timeStart+s;
-    var label=rankNum<=3?rankLabels[rankNum-1]:rankNum+'위';
-    var cls=rankNum<=3?rankClasses[rankNum-1]:'rank-n';
-    var pct=Math.round(sc/total*100);
-    var barW=Math.round(sc/maxScore*100);
-    html+='<div class="rank-item">'+
-      '<div class="rank-badge '+cls+'">'+label+'</div>'+
-      '<div class="rank-info">'+
-        '<div class="rank-date">'+getDateLabel(m.dates[di])+'</div>'+
-        '<div class="rank-time">'+h+':00 ~ '+(h+1)+':00</div>'+
-        '<div class="rank-bar-wrap"><div class="rank-bar" style="width:'+barW+'%"></div></div>'+
-      '</div>'+
-      '<div class="rank-count">'+sc+'/'+total+'명<br><span style="font-size:10px;font-weight:400;color:#aaa">'+pct+'%</span></div>'+
-    '</div>';
+    var sc=scores[key];if(sc!==prev){rn=i+1;prev=sc;}
+    var pts=key.split('-'),di=parseInt(pts[0]),s=parseInt(pts[1]),h=m.timeStart+s;
+    var label=rn<=3?rl[rn-1]:rn+'위',cls=rn<=3?rc[rn-1]:'rank-n';
+    var pct=Math.round(sc/total*100),bw=Math.round(sc/maxScore*100);
+    html+='<div class="rank-item"><div class="rank-badge '+cls+'">'+label+'</div>'+
+      '<div class="rank-info"><div class="rank-date">'+getDateLabel(m.dates[di])+'</div>'+
+      '<div class="rank-time">'+h+':00 ~ '+(h+1)+':00</div>'+
+      '<div class="rank-bar-wrap"><div class="rank-bar" style="width:'+bw+'%"></div></div></div>'+
+      '<div class="rank-count">'+sc+'/'+total+'명<br><span style="font-size:10px;font-weight:400;color:#aaa">'+pct+'%</span></div></div>';
   });
   el.innerHTML=html;renderParticipants();
 }
@@ -486,18 +490,18 @@ function renderParticipants(){
     }).join('');
 }
 
-// ── TABS ──────────────────────────────────────────────
+// ── TABS ───────────────────────────────────────────
 function switchTab(tab){
   document.getElementById('tab-mine').classList.toggle('active',tab==='mine');
   document.getElementById('tab-all').classList.toggle('active',tab==='all');
   document.getElementById('tab-content-mine').style.display=tab==='mine'?'':'none';
   document.getElementById('tab-content-all').style.display=tab==='all'?'':'none';
-  if(tab==='mine')buildMyGrid(); else buildRankList();
+  if(tab==='mine')buildMyGrid();else buildRankList();
 }
 
-// ── INIT ──────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────
 initCal();
-renderPublicList();
+subscribeMeetings(); // Firebase 실시간 구독 시작
 </script>
 </body>
 </html>
