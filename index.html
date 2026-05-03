@@ -94,10 +94,19 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .participant-chip.host{background:var(--bav-gold)}
 .link-text{color:var(--bav-blue);font-size:13px;cursor:pointer;text-decoration:underline;text-align:center;margin-top:8px}
 .empty-state{text-align:center;color:#aaa;font-size:13px;padding:20px 0}
+#toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a4b8c;color:#fff;padding:12px 24px;border-radius:24px;
+  font-size:14px;font-weight:600;white-space:nowrap;
+  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:999;
+  box-shadow:0 4px 16px rgba(0,0,0,0.2)
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
+<div id="toast"></div>
 <div class="app-header">
   <div class="header-content">
     <div class="app-title">🏰 Deggendorf Treffen</div>
@@ -195,7 +204,7 @@ input:focus,select:focus{border-color:var(--bav-blue)}
     <p class="instruction">탭해서 가능한 시간을 선택하세요 (파란색 = 가능)</p>
     <div class="grid-container"><table class="grid-table" id="my-grid"></table></div>
     <button class="btn btn-gold" onclick="saveMySchedule()">저장하기 💾</button>
-    <div id="save-alert" class="alert" style="margin-top:8px"></div>
+
   </div>
   <div id="tab-content-all" style="display:none">
     <div id="rank-list"></div>
@@ -418,9 +427,12 @@ function initDragSelect(tbl){
 }
 function saveMySchedule(){
   S.meetings[S.mid].schedules[S.user].slots=new Set(S.mySlots);
-  var al=document.getElementById('save-alert');
-  al.textContent='✅ 저장됐습니다! Prost! 🍺';al.className='alert alert-success';
-  setTimeout(function(){al.className='alert';},2500);
+  showToast('✅ 저장됐습니다! Prost! 🍺');
+}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
 }
 
 // ── RANKING ───────────────────────────────────────────
