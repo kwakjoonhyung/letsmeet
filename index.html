@@ -86,6 +86,8 @@ input:focus,select:focus{border-color:var(--bav-blue)}
 .alert-error{background:#fee2e2;color:#991b1b;display:block}
 .participant-chip{display:inline-block;background:var(--bav-blue);color:#fff;font-size:11px;padding:3px 9px;border-radius:12px;margin:2px}
 .participant-chip.host{background:var(--bav-gold)}
+.part-row{display:inline-flex;align-items:center;margin:2px}
+.part-del-btn{background:#fee2e2;border:none;border-radius:6px;color:#991b1b;font-size:11px;padding:2px 6px;cursor:pointer;margin-left:3px;line-height:1}
 .link-text{color:var(--bav-blue);font-size:13px;cursor:pointer;text-decoration:underline;text-align:center;margin-top:8px}
 .empty-state{text-align:center;color:#aaa;font-size:13px;padding:20px 0}
 /* TOAST */
@@ -483,11 +485,23 @@ function buildRankList(){
 }
 function renderParticipants(){
   var m=S.meetings[S.mid];
+  var isHost=(S.user===m.host);
   document.getElementById('participant-list').innerHTML=
     Object.keys(m.schedules).map(function(n){
-      return '<span class="participant-chip'+(n===m.host?' host':'')+'">'+
+      var chip='<span class="participant-chip'+(n===m.host?' host':'')+'">'+
         (n===m.host?'👑 ':'')+n+'</span>';
+      if(isHost && n!==m.host){
+        chip+='<button class="part-del-btn" onclick="deleteParticipant(\''+n+'\')">🗑️</button>';
+      }
+      return '<span class="part-row">'+chip+'</span>';
     }).join('');
+}
+
+function deleteParticipant(name){
+  if(!confirm('"'+name+'"님의 참여 기록을 삭제할까요?'))return;
+  db.ref('meetings/'+S.mid+'/schedules/'+name).remove().then(function(){
+    showToast('🗑️ '+name+'님이 삭제됐습니다');
+  });
 }
 
 // ── TABS ───────────────────────────────────────────
