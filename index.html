@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Deggendorf Treffen</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Noto Sans KR',sans-serif;background:#eee8d8;min-height:100vh;color:#2a1f0e}
+:root{
+  --bav-blue:#1a4b8c;--bav-blue-light:#2d6cc0;--bav-white:#f8f5ee;
+  --bav-cream:#f0e8d0;--bav-gold:#c8941a;--bav-brown:#5c3a1e;--bav-green:#2d5a27
+}
+.app-header{background:var(--bav-blue);color:var(--bav-white);text-align:center;border-bottom:4px solid var(--bav-gold)}
+.header-content{padding:14px 16px 12px}
+.app-title{font-size:19px;font-weight:800;letter-spacing:1px}
+.app-sub{font-size:10px;color:#adc4f0;letter-spacing:2.5px;margin-top:1px}
+.bav-diamonds{display:flex;justify-content:center;gap:4px;margin-top:8px}
+.bav-d{width:9px;height:9px;transform:rotate(45deg);opacity:.55}
+.bav-d.w{background:#fff}.bav-d.b{background:#4a90d9;opacity:.8}
+.page{display:none;padding:14px}.page.active{display:block}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--bav-blue);font-size:13px;font-weight:600;cursor:pointer;padding:6px 0 10px}
+.back-btn:before{content:'←';font-size:16px}
+.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:12px;border:1px solid #e0d5c0}
+.card-title{font-size:13px;font-weight:700;color:var(--bav-blue);margin-bottom:10px}
+input[type=text],input[type=password],select{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;background:var(--bav-white);color:var(--bav-brown);margin-bottom:8px;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--bav-blue)}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--bav-blue);color:#fff}.btn-primary:hover{background:var(--bav-blue-light)}
+.btn-secondary{background:var(--bav-cream);color:var(--bav-brown);border:1.5px solid #d0c0a0;margin-top:6px}
+.btn-gold{background:var(--bav-gold);color:#fff;margin-top:8px}
+.btn:active{transform:scale(.98)}
+.meeting-item{background:var(--bav-white);border:1.5px solid #e0d5c0;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative;padding-right:44px}
+.meeting-item:hover{border-color:var(--bav-blue);background:#e8f0fa}
+.meeting-name{font-weight:700;font-size:14px;color:var(--bav-blue)}
+.meeting-meta{font-size:12px;color:#888;margin-top:3px}
+.meeting-badge{display:inline-block;background:var(--bav-blue);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:6px}
+.del-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#fee2e2;border:none;border-radius:6px;color:#991b1b;font-size:13px;padding:5px 8px;cursor:pointer}
+
+/* ── CALENDAR ── */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav{background:none;border:1.5px solid #ddd;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;color:var(--bav-blue)}
+.cal-month{font-size:14px;font-weight:700;color:var(--bav-blue)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{font-size:10px;font-weight:700;text-align:center;color:#999;padding:4px 0}
+.cal-day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;font-size:12px;cursor:pointer;border:1.5px solid transparent;
+  transition:all .15s;user-select:none
+}
+.cal-day:hover:not(.cal-empty):not(.cal-past){background:#e8f0fa;border-color:var(--bav-blue-light)}
+.cal-day.cal-empty{cursor:default}
+.cal-day.cal-past{color:#ccc;cursor:default}
+.cal-day.cal-selected{background:var(--bav-blue);color:#fff;border-color:var(--bav-blue);font-weight:700}
+.cal-day.cal-today{border-color:var(--bav-gold);font-weight:700}
+.selected-dates-wrap{margin-top:10px;min-height:32px}
+.selected-dates-label{font-size:11px;color:#888;margin-bottom:5px}
+.date-chip{display:inline-block;background:var(--bav-blue);color:#fff;font-size:11px;padding:3px 8px;border-radius:10px;margin:2px;cursor:pointer}
+.date-chip:hover{background:#c0392b}
+.no-dates{font-size:12px;color:#bbb;font-style:italic}
+
+/* ── GRID ── */
+.grid-container{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid #e0d5c0;margin-top:6px}
+.grid-table{border-collapse:collapse;table-layout:auto;width:max-content;min-width:100%}
+.grid-table th{background:var(--bav-blue);color:#fff;font-size:11px;padding:7px 6px;text-align:center;font-weight:700;white-space:nowrap;min-width:52px}
+.grid-table th.tc{min-width:44px;font-size:10px;background:#2d5a99;white-space:nowrap}
+.grid-table td{height:36px;min-width:52px;border:.5px solid #e0d5c0;cursor:pointer;text-align:center;font-size:9px;color:#aaa;transition:background .1s;white-space:nowrap}
+.grid-table td.tl{min-width:44px;background:#f5f0e0;font-size:10px;color:#888;cursor:default;font-weight:600;padding:0 6px;white-space:nowrap}
+.grid-table td.sel{background:var(--bav-blue)!important}
+
+/* ── RANK ── */
+.rank-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0d5c0;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.rank-badge{min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.rank-1{background:#fde68a;color:#92400e}.rank-2{background:#e2e8f0;color:#475569}
+.rank-3{background:#fcd9b0;color:#92400e}.rank-n{background:#f0ece0;color:#888}
+.rank-info{flex:1}
+.rank-date{font-size:13px;font-weight:700;color:var(--bav-blue)}
+.rank-time{font-size:12px;color:#666;margin-top:2px}
+.rank-bar-wrap{margin-top:5px;background:#f0ece0;border-radius:6px;height:6px;overflow:hidden}
+.rank-bar{height:100%;border-radius:6px;background:var(--bav-blue)}
+.rank-count{font-size:11px;font-weight:700;color:var(--bav-blue);flex-shrink:0;text-align:right}
+
+/* ── TABS ── */
+.tab-bar{display:flex;background:var(--bav-cream);border-radius:10px;padding:3px;margin-bottom:14px;border:1px solid #e0d5c0}
+.tab-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:8px;font-size:13px;cursor:pointer;color:#888;transition:all .15s}
+.tab-btn.active{background:var(--bav-blue);color:#fff;font-weight:700}
+
+.instruction{font-size:12px;color:#888;text-align:center;margin:4px 0 10px}
+.alert{padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;display:none}
+.alert-error{background:#fee2e2;color:#991b1b;display:block}
+.alert-success{background:#dcfce7;color:#166534;display:block}
+.participant-chip{display:inline-block;background:var(--bav-blue);color:#fff;font-size:11px;padding:3px 9px;border-radius:12px;margin:2px}
+.participant-chip.host{background:var(--bav-gold)}
+.link-text{color:var(--bav-blue);font-size:13px;cursor:pointer;text-decoration:underline;text-align:center;margin-top:8px}
+.empty-state{text-align:center;color:#aaa;font-size:13px;padding:20px 0}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-content">
+    <div class="app-title">🏰 Deggendorf Treffen</div>
+    <div class="app-sub">교환학생 모임 일정 조율</div>
+    <div class="bav-diamonds">
+      <div class="bav-d w"></div><div class="bav-d b"></div>
+      <div class="bav-d w"></div><div class="bav-d b"></div>
+      <div class="bav-d w"></div><div class="bav-d b"></div>
+      <div class="bav-d w"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">🔑 로그인 / 참여</div>
+    <input type="text" id="login-name" placeholder="이름 (예: 김민준)" />
+    <input type="password" id="login-pw" placeholder="비밀번호" />
+    <div id="login-alert" class="alert"></div>
+    <button class="btn btn-primary" onclick="doLogin()">입장하기 🚪</button>
+    <p class="link-text" onclick="showPage('page-register')">처음이에요? 새 모임 만들기 →</p>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 모임 목록</div>
+    <div id="public-meeting-list"><div class="empty-state">아직 생성된 모임이 없어요<br>새 모임을 만들어보세요! 🍺</div></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="page" id="page-register">
+  <button class="back-btn" onclick="showPage('page-home')">홈으로</button>
+  <div class="card">
+    <div class="card-title">👤 주최자 정보</div>
+    <input type="text" id="host-name" placeholder="이름" />
+    <input type="password" id="host-pw" placeholder="비밀번호 설정" />
+  </div>
+  <div class="card">
+    <div class="card-title">📌 모임 이름</div>
+    <input type="text" id="meeting-title" placeholder="모임 이름 (예: 독일 재회 파티 🍻)" />
+  </div>
+  <div class="card">
+    <div class="card-title">📅 날짜 선택 <span style="font-size:11px;font-weight:400;color:#999">(달력에서 원하는 날짜를 탭하세요)</span></div>
+    <!-- Calendar -->
+    <div class="cal-header">
+      <button class="cal-nav" onclick="calMove(-1)">‹</button>
+      <div class="cal-month" id="cal-month-label"></div>
+      <button class="cal-nav" onclick="calMove(1)">›</button>
+    </div>
+    <div class="cal-grid" id="cal-dow-row">
+      <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
+      <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
+    </div>
+    <div class="cal-grid" id="cal-days"></div>
+    <div class="selected-dates-wrap">
+      <div class="selected-dates-label">선택된 날짜 <span id="sel-count">0</span>개 (탭하면 제거)</div>
+      <div id="sel-date-chips"><div class="no-dates">날짜를 선택해주세요</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⏰ 시간 범위</div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1">
+        <div style="font-size:11px;color:#888;margin-bottom:4px">시작</div>
+        <select id="time-start">
+          <option value="9">오전 9시</option><option value="10">오전 10시</option><option value="11">오전 11시</option>
+          <option value="12">오후 12시</option><option value="13">오후 1시</option><option value="14" selected>오후 2시</option>
+          <option value="15">오후 3시</option><option value="16">오후 4시</option><option value="17">오후 5시</option>
+          <option value="18">오후 6시</option><option value="19">오후 7시</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:#888;margin-bottom:4px">종료</div>
+        <select id="time-end">
+          <option value="17">오후 5시</option><option value="18">오후 6시</option><option value="19">오후 7시</option>
+          <option value="20" selected>오후 8시</option><option value="21">오후 9시</option><option value="22">오후 10시</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="create-alert" class="alert"></div>
+  <button class="btn btn-primary" onclick="createMeeting()">모임 생성하기 🏰</button>
+  <button class="btn btn-secondary" onclick="showPage('page-home')" style="margin-top:8px">취소</button>
+</div>
+
+<!-- MEETING -->
+<div class="page" id="page-meeting">
+  <button class="back-btn" onclick="logout()">모임 목록으로</button>
+  <div id="meeting-header"></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-mine" onclick="switchTab('mine')">✏️ 내 일정</button>
+    <button class="tab-btn" id="tab-all" onclick="switchTab('all')">📊 전체 현황</button>
+  </div>
+  <div id="tab-content-mine">
+    <p class="instruction">탭해서 가능한 시간을 선택하세요 (파란색 = 가능)</p>
+    <div class="grid-container"><table class="grid-table" id="my-grid"></table></div>
+    <button class="btn btn-gold" onclick="saveMySchedule()">저장하기 💾</button>
+    <div id="save-alert" class="alert" style="margin-top:8px"></div>
+  </div>
+  <div id="tab-content-all" style="display:none">
+    <div id="rank-list"></div>
+    <div class="card" style="margin-top:4px">
+      <div class="card-title">👥 참여자</div>
+      <div id="participant-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var S={meetings:{},user:null,mid:null,mySlots:new Set()};
+var calYear,calMonth,selDates=[];
+
+// ── CALENDAR ──────────────────────────────────────────
+function initCal(){
+  var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();renderCal();
+}
+function calMove(d){
+  calMonth+=d;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  renderCal();
+}
+function renderCal(){
+  var months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-month-label').textContent=calYear+'년 '+months[calMonth];
+  var first=new Date(calYear,calMonth,1).getDay();
+  var days=new Date(calYear,calMonth+1,0).getDate();
+  var today=new Date(); today.setHours(0,0,0,0);
+  var html='';
+  for(var i=0;i<first;i++) html+='<div class="cal-day cal-empty"></div>';
+  for(var d=1;d<=days;d++){
+    var dt=new Date(calYear,calMonth,d);
+    var ds=fmtDate(dt);
+    var isPast=dt<today;
+    var isSel=selDates.indexOf(ds)>=0;
+    var isToday=dt.getTime()===today.getTime();
+    var cls='cal-day'+(isPast?' cal-past':'')+(isSel?' cal-selected':'')+(isToday?' cal-today':'');
+    var onclick=isPast?'':'onclick="toggleDate(\''+ds+'\')"';
+    html+='<div class="'+cls+'" '+onclick+'>'+d+'</div>';
+  }
+  document.getElementById('cal-days').innerHTML=html;
+  renderChips();
+}
+function toggleDate(ds){
+  var idx=selDates.indexOf(ds);
+  if(idx>=0) selDates.splice(idx,1);
+  else { selDates.push(ds); selDates.sort(); }
+  renderCal();
+}
+function removeDate(ds){toggleDate(ds);}
+function renderChips(){
+  document.getElementById('sel-count').textContent=selDates.length;
+  if(!selDates.length){
+    document.getElementById('sel-date-chips').innerHTML='<div class="no-dates">날짜를 선택해주세요</div>';return;
+  }
+  document.getElementById('sel-date-chips').innerHTML=selDates.map(function(ds){
+    return '<span class="date-chip" onclick="removeDate(\''+ds+'\')">'+getDateLabel(ds)+'</span>';
+  }).join('');
+}
+
+// ── HELPERS ──────────────────────────────────────────
+function fmtDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function pad(n){return n<10?'0'+n:n;}
+function getDateLabel(s){
+  var d=new Date(s+'T00:00:00'),days=['일','월','화','수','목','금','토'];
+  return (d.getMonth()+1)+'/'+d.getDate()+'('+days[d.getDay()]+')';
+}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+// ── MEETING LIST ──────────────────────────────────────
+function deleteMeeting(id,e){
+  e.stopPropagation();
+  var m=S.meetings[id];
+  var pw=prompt('모임을 삭제하려면 주최자('+m.host+')의 비밀번호를 입력하세요:');
+  if(pw===null)return;
+  if(pw!==m.schedules[m.host].pw){alert('비밀번호가 틀렸습니다');return;}
+  delete S.meetings[id];renderPublicList();
+}
+function renderPublicList(){
+  var el=document.getElementById('public-meeting-list');
+  var ids=Object.keys(S.meetings);
+  if(!ids.length){el.innerHTML='<div class="empty-state">아직 생성된 모임이 없어요<br>새 모임을 만들어보세요! 🍺</div>';return;}
+  el.innerHTML=ids.map(function(id){
+    var m=S.meetings[id],cnt=Object.keys(m.schedules).length;
+    var dateRange=m.dates.length===1?getDateLabel(m.dates[0]):getDateLabel(m.dates[0])+'외 '+(m.dates.length-1)+'일';
+    return '<div class="meeting-item" onclick="joinMeeting(\''+id+'\')">'+
+      '<div class="meeting-name">'+m.title+'<span class="meeting-badge">'+cnt+'명</span></div>'+
+      '<div class="meeting-meta">📅 '+dateRange+'&nbsp;·&nbsp;주최: '+m.host+'</div>'+
+      '<button class="del-btn" onclick="deleteMeeting(\''+id+'\',event)">🗑️</button>'+
+      '</div>';
+  }).join('');
+}
+
+// ── AUTH ──────────────────────────────────────────────
+function doLogin(){
+  var name=document.getElementById('login-name').value.trim();
+  var pw=document.getElementById('login-pw').value.trim();
+  var al=document.getElementById('login-alert');al.className='alert';
+  if(!name||!pw){al.textContent='이름과 비밀번호를 입력해주세요';al.className='alert alert-error';return;}
+  var mid=Object.keys(S.meetings).find(function(id){
+    var m=S.meetings[id];return m.schedules[name]&&m.schedules[name].pw===pw;
+  });
+  if(mid){S.user=name;S.mid=mid;S.mySlots=new Set(S.meetings[mid].schedules[name].slots);openMeeting(mid);}
+  else{al.textContent='일치하는 계정이 없습니다. 모임 목록에서 참여하거나 새 모임을 만들어보세요.';al.className='alert alert-error';}
+}
+function joinMeeting(mid){
+  var name=document.getElementById('login-name').value.trim();
+  var pw=document.getElementById('login-pw').value.trim();
+  var al=document.getElementById('login-alert');al.className='alert';
+  if(!name||!pw){al.textContent='이름과 비밀번호를 먼저 입력해주세요';al.className='alert alert-error';return;}
+  var m=S.meetings[mid];
+  if(m.schedules[name]){if(m.schedules[name].pw!==pw){al.textContent='비밀번호가 틀렸어요';al.className='alert alert-error';return;}}
+  else{m.schedules[name]={pw:pw,slots:new Set()};}
+  S.user=name;S.mid=mid;S.mySlots=new Set(m.schedules[name].slots);openMeeting(mid);
+}
+function logout(){S.user=null;S.mid=null;S.mySlots=new Set();renderPublicList();showPage('page-home');}
+
+// ── CREATE ────────────────────────────────────────────
+function createMeeting(){
+  var name=document.getElementById('host-name').value.trim();
+  var pw=document.getElementById('host-pw').value.trim();
+  var title=document.getElementById('meeting-title').value.trim();
+  var ts=parseInt(document.getElementById('time-start').value);
+  var te=parseInt(document.getElementById('time-end').value);
+  var al=document.getElementById('create-alert');al.className='alert';
+  if(!name||!pw||!title){al.textContent='이름, 비밀번호, 모임 이름을 입력해주세요';al.className='alert alert-error';return;}
+  if(!selDates.length){al.textContent='날짜를 하나 이상 선택해주세요';al.className='alert alert-error';return;}
+  if(ts>=te){al.textContent='시간을 확인해주세요';al.className='alert alert-error';return;}
+  var id='mtg_'+Date.now();
+  S.meetings[id]={id:id,title:title,host:name,dates:[].concat(selDates),timeStart:ts,timeEnd:te,schedules:{}};
+  S.meetings[id].schedules[name]={pw:pw,slots:new Set()};
+  S.user=name;S.mid=id;S.mySlots=new Set();
+  selDates=[];renderCal();
+  renderPublicList();openMeeting(id);
+}
+
+// ── OPEN MEETING ──────────────────────────────────────
+function openMeeting(mid){
+  var m=S.meetings[mid];
+  var cnt=Object.keys(m.schedules).length;
+  var datesStr=m.dates.map(getDateLabel).join(', ');
+  document.getElementById('meeting-header').innerHTML=
+    '<div class="card" style="margin-bottom:12px">'+
+    '<div style="font-size:17px;font-weight:800;color:var(--bav-blue)">'+m.title+'</div>'+
+    '<div style="font-size:12px;color:#888;margin-top:3px">주최: '+m.host+' &nbsp;·&nbsp; 참여 '+cnt+'명</div>'+
+    '<div style="font-size:12px;color:#888;margin-top:2px;line-height:1.6">📅 '+datesStr+'</div>'+
+    '<div style="font-size:12px;font-weight:700;color:var(--bav-blue);margin-top:6px">👋 안녕하세요, '+S.user+'님!</div>'+
+    '</div>';
+  switchTab('mine');showPage('page-meeting');
+}
+
+// ── GRID ──────────────────────────────────────────────
+function buildMyGrid(){
+  var m=S.meetings[S.mid],tbl=document.getElementById('my-grid');
+  tbl.innerHTML='';
+  var th=tbl.createTHead(),hr=th.insertRow();
+  var tc=document.createElement('th');tc.className='tc';tc.textContent='시간';hr.appendChild(tc);
+  m.dates.forEach(function(d){var t=document.createElement('th');t.textContent=getDateLabel(d);hr.appendChild(t);});
+  var tb=tbl.createTBody();
+  for(var s=0;s<m.timeEnd-m.timeStart;s++){
+    var h=parseInt(m.timeStart)+s,row=tb.insertRow();
+    var td0=row.insertCell();td0.className='tl';td0.textContent=h+':00';
+    m.dates.forEach(function(d,di){
+      var td=row.insertCell(),key=di+'-'+s;
+      if(S.mySlots.has(key))td.classList.add('sel');
+      (function(td,key){td.onclick=function(){
+        if(S.mySlots.has(key)){S.mySlots.delete(key);td.classList.remove('sel');}
+        else{S.mySlots.add(key);td.classList.add('sel');}
+      };})(td,key);
+    });
+  }
+}
+function saveMySchedule(){
+  S.meetings[S.mid].schedules[S.user].slots=new Set(S.mySlots);
+  var al=document.getElementById('save-alert');
+  al.textContent='✅ 저장됐습니다! Prost! 🍺';al.className='alert alert-success';
+  setTimeout(function(){al.className='alert';},2500);
+}
+
+// ── RANKING ───────────────────────────────────────────
+function buildRankList(){
+  var m=S.meetings[S.mid];
+  var total=Object.keys(m.schedules).length;
+  var scores={};
+  for(var di=0;di<m.dates.length;di++){
+    for(var s=0;s<m.timeEnd-m.timeStart;s++){
+      var key=di+'-'+s,cnt=0;
+      Object.values(m.schedules).forEach(function(sc){if(sc.slots.has(key))cnt++;});
+      if(cnt>0)scores[key]=cnt;
+    }
+  }
+  var sorted=Object.keys(scores).sort(function(a,b){return scores[b]-scores[a];});
+  var el=document.getElementById('rank-list');
+  if(!sorted.length){el.innerHTML='<div class="empty-state">아직 아무도 일정을 입력하지 않았어요 🤷</div>';renderParticipants();return;}
+  var maxScore=scores[sorted[0]];
+  var rankLabels=['🥇','🥈','🥉'];
+  var rankClasses=['rank-1','rank-2','rank-3'];
+  var prevScore=-1,rankNum=0;
+  var html='<div style="font-size:13px;font-weight:700;color:var(--bav-blue);margin-bottom:8px">총 '+total+'명 참여 · 상위 순위</div>';
+  sorted.slice(0,8).forEach(function(key,i){
+    var sc=scores[key];
+    if(sc!==prevScore){rankNum=i+1;prevScore=sc;}
+    var parts=key.split('-');
+    var di=parseInt(parts[0]),s=parseInt(parts[1]);
+    var h=m.timeStart+s;
+    var label=rankNum<=3?rankLabels[rankNum-1]:rankNum+'위';
+    var cls=rankNum<=3?rankClasses[rankNum-1]:'rank-n';
+    var pct=Math.round(sc/total*100);
+    var barW=Math.round(sc/maxScore*100);
+    html+='<div class="rank-item">'+
+      '<div class="rank-badge '+cls+'">'+label+'</div>'+
+      '<div class="rank-info">'+
+        '<div class="rank-date">'+getDateLabel(m.dates[di])+'</div>'+
+        '<div class="rank-time">'+h+':00 ~ '+(h+1)+':00</div>'+
+        '<div class="rank-bar-wrap"><div class="rank-bar" style="width:'+barW+'%"></div></div>'+
+      '</div>'+
+      '<div class="rank-count">'+sc+'/'+total+'명<br><span style="font-size:10px;font-weight:400;color:#aaa">'+pct+'%</span></div>'+
+    '</div>';
+  });
+  el.innerHTML=html;renderParticipants();
+}
+function renderParticipants(){
+  var m=S.meetings[S.mid];
+  document.getElementById('participant-list').innerHTML=
+    Object.keys(m.schedules).map(function(n){
+      return '<span class="participant-chip'+(n===m.host?' host':'')+'">'+
+        (n===m.host?'👑 ':'')+n+'</span>';
+    }).join('');
+}
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(tab){
+  document.getElementById('tab-mine').classList.toggle('active',tab==='mine');
+  document.getElementById('tab-all').classList.toggle('active',tab==='all');
+  document.getElementById('tab-content-mine').style.display=tab==='mine'?'':'none';
+  document.getElementById('tab-content-all').style.display=tab==='all'?'':'none';
+  if(tab==='mine')buildMyGrid(); else buildRankList();
+}
+
+// ── INIT ──────────────────────────────────────────────
+initCal();
+renderPublicList();
+</script>
+</body>
+</html>
